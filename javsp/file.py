@@ -88,6 +88,7 @@ def scan_movies(root: str) -> List[Movie]:
         dirs = set([os.path.split(i)[0] for i in files])
         # 不同位置的多部影片有相同番号时，略过并报错
         if len(dirs) > 1:
+            logger.error(f"ADD non_slice_dup: avid='{avid}', files='{files}'")
             non_slice_dup[avid] = files
             del dic[avid]
             continue
@@ -108,7 +109,7 @@ def scan_movies(root: str) -> List[Movie]:
         if (len(set(postfixes)) != 1
             # remaining为初步提取的分片信息，不允许有重复值
             or len(slices) != len(set(slices))):
-            logger.info(f"无法识别分片信息: {prefix=}, {remaining=}")
+            logger.error(f"无法识别分片信息: {prefix=}, {remaining=}")
             non_slice_dup[avid] = files
             del dic[avid]
             continue
@@ -116,7 +117,7 @@ def scan_movies(root: str) -> List[Movie]:
         sorted_slices = sorted(slices)
         first, last = sorted_slices[0], sorted_slices[-1]
         if (first not in ('0', '1', 'a')) or (ord(last) != (ord(first)+len(sorted_slices)-1)):
-            logger.info(f"无效的分片起始编号或分片编号不连续: {sorted_slices=}")
+            logger.error(f"无效的分片起始编号或分片编号不连续: {sorted_slices=}")
             non_slice_dup[avid] = files
             del dic[avid]
             continue
@@ -131,7 +132,7 @@ def scan_movies(root: str) -> List[Movie]:
         for f in files:
             msg += ('  ' + os.path.relpath(f, root) + '\n')
     if msg:
-        logger.error("下列番号对应多部影片文件且不符合分片规则，已略过整理，请手动处理后重新运行脚本: \n" + msg)
+        logger.error("下列番号对应多部影片文件且不符合分片规则。已略过整理，请手动处理后重新运行脚本: \n" + msg)
     # 转换数据的组织格式
     movies: List[Movie] = []
     for avid, files in dic.items():
