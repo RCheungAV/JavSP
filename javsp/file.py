@@ -98,7 +98,7 @@ def scan_movies(root: str) -> List[Movie]:
             pattern_expr = re_escape(prefix) + r'\s*([a-z\d])\s*'
             pattern = re.compile(pattern_expr, flags=re.I)
         except re.error:
-            logger.debug(f"正则识别影片分片信息时出错: '{pattern_expr}'")
+            logger.info(f"正则识别影片分片信息时出错: '{pattern_expr}'")
             del dic[avid]
             continue
         remaining = [pattern.sub(r'\1', i).lower() for i in basenames]
@@ -108,7 +108,7 @@ def scan_movies(root: str) -> List[Movie]:
         if (len(set(postfixes)) != 1
             # remaining为初步提取的分片信息，不允许有重复值
             or len(slices) != len(set(slices))):
-            logger.debug(f"无法识别分片信息: {prefix=}, {remaining=}")
+            logger.info(f"无法识别分片信息: {prefix=}, {remaining=}")
             non_slice_dup[avid] = files
             del dic[avid]
             continue
@@ -116,7 +116,7 @@ def scan_movies(root: str) -> List[Movie]:
         sorted_slices = sorted(slices)
         first, last = sorted_slices[0], sorted_slices[-1]
         if (first not in ('0', '1', 'a')) or (ord(last) != (ord(first)+len(sorted_slices)-1)):
-            logger.debug(f"无效的分片起始编号或分片编号不连续: {sorted_slices=}")
+            logger.info(f"无效的分片起始编号或分片编号不连续: {sorted_slices=}")
             non_slice_dup[avid] = files
             del dic[avid]
             continue
